@@ -1,0 +1,88 @@
+// backend code for upload images to cloudinary
+// just the testing route to check whether the imageurls are being received in backend or not
+const cloudinary = require("cloudinary").v2;
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: "djylexzyi",
+    api_key: "142328284162156",
+    api_secret: "tsJyiQKlQngYnYxw8faaF0q2kok",
+});
+app.post("/upload", async (req, res) => {
+    const { imageData } = req.body;
+    // Upload the image to Cloudinary
+    const uploadResult = await cloudinary.uploader.upload(imageData, {
+        folder: "ecom_project_product_images", // Optional: specify a folder in Cloudinary
+    });
+    if (!uploadResult) {
+        const err = new CustomError("Image upload failed", 407);
+        throw err;
+    }
+    res.status(200).json({ success: true, imageUrl: uploadResult });
+});
+
+🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀
+
+frontend code to send the imageurl link to the backend so that after receiving the imageurl link it can upload the images to cloudinary and then can based on the received response from there it can save the images of the respective product to the database
+
+import React, { useState, useRef } from "react";
+import axios from "axios";
+
+const ImageUploadForm = () => {
+    const [images, setImages] = useState([]);
+    const inputFileRef = useRef(null);
+    const tempArr = [];
+
+    const handleImageChange = (e) => {
+        const files = Array.from(e.target.files);
+
+        try {
+            for (const imageFile of files) {
+                const reader = new FileReader();
+
+                reader.onload = async (event) => {
+                    const imageData = event.target.result;
+                    try {
+                        tempArr.push(imageData);
+                        setImages(tempArr);
+                    } catch (error) {
+                        console.error("Error uploading image:", error);
+                    }
+                };
+                reader.readAsDataURL(imageFile);
+            }
+            if (inputFileRef.current.value) inputFileRef.current.value = "";
+            // setSelectedImages([]);
+        } catch (error) {
+            console.error("Error reading images:", error);
+        }
+    };
+
+    const handleUpload = async () => {
+        const response = await axios.post(
+            "http://localhost:4000/api/product/addProduct",
+            { images }
+        );
+        console.log(response);
+    };
+
+    return (
+        <div>
+            <h2>Upload Images</h2>
+            <input
+                ref={inputFileRef}
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageChange}
+            />
+            <button
+                onClick={handleUpload}
+                className="border border-pink-500 p-2 rounded-md shadow-xl"
+            >
+                Upload Images
+            </button>
+        </div>
+    );
+};
+
+export default ImageUploadForm;

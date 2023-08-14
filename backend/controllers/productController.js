@@ -1,11 +1,40 @@
 const asyncErrorHandlerFunction = require("../middleware/asyncErrorHandler");
 const Product = require("../model/productModel");
 const CustomError = require("../utils/customErrorClass");
+const cloudinary = require("cloudinary").v2;
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.cloud_name,
+    api_key: process.env.api_key,
+    api_secret: process.env.api_secret,
+});
 
 // creating a new product and saving it into the database
 module.exports.addProductController = asyncErrorHandlerFunction(
     async (req, res) => {
         const productData = req.body;
+        const { images } = req.body;
+        const productImages = [];
+
+        // Upload the image to Cloudinary
+        for (let i = 0; i < images.length; i++) {
+            const uploadResult = await cloudinary.uploader.upload(images[i], {
+                folder: "ecom_project_product_images",
+            });
+            if (!uploadResult) {
+                const err = new CustomError("Image upload failed", 407);
+                return next(err);
+            }
+            if (uploadResult) {
+                productImages.push({
+                    publicId: uploadResult.public_id,
+                    imageUrl: uploadResult.secure_url,
+                });
+            }
+        }
+
+        // Add productImages data to productData
+        productData.productImages = productImages;
         const newProduct = new Product(productData);
         const savedProduct = await newProduct.save();
         return res.status(201).json({
@@ -57,6 +86,7 @@ module.exports.getAllProductController = asyncErrorHandlerFunction(
 );
 
 // Update product data using PATCH
+// TODO:while updating the product data we also need to take care of the product images section. Like if the user wants to delete the existing product images and want to upload the new images in place of them then for that case the code should be modified. So here's a possibility to update the code later on
 module.exports.updateProductController = asyncErrorHandlerFunction(
     async (req, res) => {
         const productId = req.params.id; // Get the product ID from URL parameter

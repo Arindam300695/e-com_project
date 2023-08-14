@@ -4,7 +4,6 @@ const {
     updateProductController,
     deleteProductController,
 } = require("../controllers/productController");
-
 const productRoute = require("express").Router();
 
 productRoute.post("/addProduct", addProductController);
